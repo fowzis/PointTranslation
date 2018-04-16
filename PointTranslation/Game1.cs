@@ -80,6 +80,7 @@ namespace PointTranslation
             spriteBatch.Begin();
             spriteBatch.DrawLine(new Vector2(210, 210), new Vector2(110, 60), Color.Red);
             spriteBatch.DrawPixel(new Vector2(100, 100), Color.Yellow, 2);
+
             spriteBatch.End();
 
             base.Draw(gameTime);
