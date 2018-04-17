@@ -9,7 +9,7 @@ namespace PointTranslation
         public static void DrawPixel(this SpriteBatch spriteBatch, Vector2 point, Color color, float thickness = 1f)
         {
 
-            spriteBatch.Draw(Art.Pixel, point, null, color, 0f,Vector2.Zero, new Vector2(thickness), SpriteEffects.None, 0);
+            spriteBatch.Draw(Art.Pixel, point, null, color, 0f, new Vector2(thickness/2), new Vector2(thickness), SpriteEffects.None, 0);
         }
 
         public static void DrawLine(this SpriteBatch spriteBatch, Vector2 point1, Vector2 point2, Color color, float thickness = 1f)

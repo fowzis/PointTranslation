@@ -1,6 +1,8 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using System;
+using System.Collections.Generic;
 
 namespace PointTranslation
 {
@@ -11,6 +13,10 @@ namespace PointTranslation
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+
+        Vector2 origin, point;
+        float angle = 0;
+        float radius = 50;
 
         public Game1()
         {
@@ -27,6 +33,7 @@ namespace PointTranslation
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            origin = point = new Vector2(150);
 
             base.Initialize();
         }
@@ -58,12 +65,26 @@ namespace PointTranslation
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
+        /// 
+        List<Vector2> pointsList = new List<Vector2>();
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
 
             // TODO: Add your update logic here
+            #region Point moving in a circular path
+            if (angle >= 360)
+            {
+                angle = 0;
+                pointsList.Clear();
+            }
+            point.X = origin.X + (float)Math.Cos(angle) * radius;
+            point.Y = origin.Y + (float)Math.Sin(angle) * radius;
+            pointsList.Add(point);
+            angle += 0.1f;
+            #endregion
+
 
             base.Update(gameTime);
         }
@@ -79,7 +100,13 @@ namespace PointTranslation
             // TODO: Add your drawing code here
             spriteBatch.Begin();
             spriteBatch.DrawLine(new Vector2(210, 210), new Vector2(110, 60), Color.Red);
-            spriteBatch.DrawPixel(new Vector2(100, 100), Color.Yellow, 2);
+            foreach (var point in pointsList)
+            {
+                spriteBatch.DrawPixel(point, Color.White, 2);
+            }
+            spriteBatch.DrawLine(origin, point, Color.Yellow, 1);
+            spriteBatch.DrawPixel(point, Color.White, 4);
+            spriteBatch.DrawPixel(origin, Color.Red, 4);
 
             spriteBatch.End();
 
