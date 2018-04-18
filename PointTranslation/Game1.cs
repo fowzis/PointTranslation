@@ -16,9 +16,17 @@ namespace PointTranslation
         SpriteBatch spriteBatch;
 
         Vector2 origin, point;
-        float angle = 0;
-        float radius = 50;
+        double angleDegree = 0;
+        double angleRadians;
+        double tan;
+        float radius = 100;
 
+        Vector2 aim = Vector2.Normalize(new Vector2(30, 30));
+        Vector2 orig = new Vector2(100, 100);
+        Vector2 end;
+        float radius1 = 50;
+        double angleRad;
+        
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -34,7 +42,9 @@ namespace PointTranslation
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            origin = point = new Vector2(150);
+            origin = new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2);
+
+            angleRad = aim.ToAngleRad();
 
             base.Initialize();
         }
@@ -66,8 +76,6 @@ namespace PointTranslation
         /// checking for collisions, gathering input, and playing audio.
         /// </summary>
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
-        /// 
-        List<Vector2> pointsList = new List<Vector2>();
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
@@ -75,19 +83,21 @@ namespace PointTranslation
 
             // TODO: Add your update logic here
             #region Point moving in a circular path
-            if (angle >= 360)
-            {
-                angle = 0;
-                pointsList.Clear();
-            }
-            angle = 45;
+            if (angleDegree > 360)
+                angleDegree = 0;
+            else
+                angleDegree += 0.5;
 
-            point.X = origin.X + (float)Math.Cos(angle) * radius;
-            point.Y = origin.Y + (float)Math.Sin(angle) * radius;
-            //pointsList.Add(point);
-            //angle += 0.1f;
+            angleRadians = angleDegree * (Math.PI / 180);   // in radians
+            tan = Math.Tan(angleRadians);  // Tan(theta) = Sin(theta)/Cos(therta) = Y/X;
+
+            point.X = origin.X + (float)(Math.Cos(angleRadians) * radius1);
+            point.Y = origin.Y + (float)(Math.Sin(angleRadians) * radius1);
             #endregion
 
+
+            angleRad += 0.01f;
+            end = orig + Extention.FromPolar((float)angleRad, radius1);
 
             base.Update(gameTime);
         }
@@ -102,31 +112,38 @@ namespace PointTranslation
 
             // TODO: Add your drawing code here
             spriteBatch.Begin();
-            spriteBatch.DrawLine(new Vector2(210, 210), new Vector2(110, 60), Color.Red);
-            //foreach (var point in pointsList)
-            //{
-                spriteBatch.DrawPixel(point, Color.White, 2);
-            //}
-            spriteBatch.DrawPixel(point, Color.White, 4);
+
+            #region A Point rotating in circular path
             spriteBatch.DrawPixel(origin, Color.Red, 4);
-            spriteBatch.DrawLine(origin, point, Color.Yellow, 2);
-
-            angle = 0;
-            Vector2 origin1 = new Vector2(300, 300);
-            Vector2 point1 = new Vector2(origin1.X + (float)Math.Cos(angle) * radius, origin1.Y + (float)Math.Sin(angle) * radius);
-            spriteBatch.DrawPixel(origin1, Color.Red, 4);
             spriteBatch.DrawLine(
-                origin1,
-                point1,
-                Color.Blue
-                );
-            spriteBatch.DrawPixel(point1, Color.Wheat, 4);
-            spriteBatch.DrawCircle(origin1, radius, 50, Color.Gray);
+                origin,
+                point,
+                Color.Blue);
+            spriteBatch.DrawPixel(point, Color.Wheat, 4);
+            spriteBatch.DrawCircle(origin, radius, 50, Color.Gray);
+            //this.Window.Title = "angle=(" + angleDegree + "), radians=(" + angleRadians + "), result=(" + tan + ")";
+            #endregion
 
-            double radians = Math.Atan2(point1.Y, point1.X);
-            double angle1 = radians * (180 / Math.PI);
+            #region Three points rotating in circular path
+            spriteBatch.DrawLine(orig, end, Color.Gray);
+            spriteBatch.DrawPixel(orig, Color.Yellow, 4);
+            spriteBatch.DrawPixel(end, Color.Yellow, 4);
+            spriteBatch.DrawCircle(orig, (end - orig).Length(), 50, Color.Blue);
 
-            this.Window.Title = "point1 angle = (" + angle1.ToString() + ")";
+            // Find the two vectors parallel to the Ray emmitting from the circle center in a given direction
+            double angleRad1 = angleRad + (Math.PI / 2);
+            double angleRad2 = angleRad - (Math.PI / 2);
+            Vector2 P1 = new Vector2(orig.X + (float)(Math.Cos(angleRad1) * radius1), orig.Y + (float)(Math.Sin(angleRad1) * radius1));
+            Vector2 P2 = new Vector2(orig.X + (float)(Math.Cos(angleRad2) * radius1), orig.Y + (float)(Math.Sin(angleRad2) * radius1));
+
+            spriteBatch.DrawPixel(P1, Color.AliceBlue, 4);
+            spriteBatch.DrawLine(P1, P1+Extention.FromPolar((float)angleRad, radius1), Color.LightBlue);
+
+            spriteBatch.DrawPixel(P2, Color.Bisque, 4);
+            spriteBatch.DrawLine(P2, P2+ Extention.FromPolar((float)angleRad, radius1), Color.LightBlue);
+
+            this.Window.Title = "aim=(" + aim + "), radians=(" + angleRad + "), result =(" + tan + ")";
+            #endregion
 
             #region C3.XNA
             //spriteBatch.DrawRectangle(new Rectangle(100, 100, 100, 200), Color.Purple, 20);
